@@ -8,7 +8,8 @@
       src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDfEGRgJCleog0v6QuMAAa6U-JMObrn68">
     </script>
     <script type="text/javascript">
-      function initialize() {
+
+      function getCoord() {
       	var lat = -34.397, lng = 150.644;
       	if (navigator.geolocation) {
         	navigator.geolocation.getCurrentPosition(function (res) {
@@ -16,10 +17,19 @@
         		lng = res.coords.longitude;
         	});
         	console.log("da");
-    	} else { console.log("nu"); }
+        	initialize(lat,lng);
+    	} 
+    	else { 
+    		console.log("nu"); 
+    		initialize(lat,lng);
+    	}
 
+  
+      }
+      function initialize(lat, lng) {
+      	
         var mapOptions = {
-          center: { lat: lat, lng: lng},
+          center: { lat: lat, lng: lng },
           zoom: 9
         };
 
