@@ -10,27 +10,24 @@
     </script>
     <script type="text/javascript">
 
-      function getCoord() {
-      	var lat = -34.397, lng = 150.644;
+    function getCoord() {
+      	var lat = 45.7597, lng = 21.2300;
       	if (navigator.geolocation) {
         	navigator.geolocation.getCurrentPosition(function (res) {
         		lat = res.coords.latitude;
         		lng = res.coords.longitude;
         		initialize(lat,lng);
         	});
-        	console.log("da");
     	} 
     	else { 
-    		console.log("nu"); 
     		initialize(lat,lng);
     	}
-  
-      }
-      function initialize(lat, lng) {
-      	
+  	}
+
+    function initialize(lat, lng) {
         var mapOptions = {
           center: { lat: lat, lng: lng },
-          zoom: 9
+          zoom: 14
         };
 
         var map = new google.maps.Map(document.getElementById('map-canvas'),
