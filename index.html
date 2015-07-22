@@ -16,9 +16,9 @@
         	navigator.geolocation.getCurrentPosition(function (res) {
         		lat = res.coords.latitude;
         		lng = res.coords.longitude;
+        		initialize(lat,lng);
         	});
         	console.log("da");
-        	initialize(lat,lng);
     	} 
     	else { 
     		console.log("nu"); 
