@@ -28,6 +28,11 @@
 	    var geocoder = new google.maps.Geocoder();
 	    var autocomplete, places;
 
+	    var directionsService = new google.maps.DirectionsService();
+
+		var directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
+
+
 	    function getCoord() {
 	      	var lat = 45.7597, lng = 21.2300;
 	      	var here = new google.maps.LatLng(lat, lng);
@@ -60,7 +65,7 @@
 	        };
 
 	        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
-
+	        directionsDisplay.setMap(map);
 
 	        autocomplete = new google.maps.places.Autocomplete(document.getElementById('here'));
 	        autocomplete2 = new google.maps.places.Autocomplete(document.getElementById('there'));
@@ -79,12 +84,15 @@
 
 	    	});
 	    	var markers = new Array(marker,marker2);
+	    	$('#route').click(function () { 
+	    		calcRoute(marker,marker2);
+	    	});
 
 	    	var infowindow = new google.maps.InfoWindow({
-	      		content: "You are here (drag the marker if needed)"
+	      		content: "Search or drag blue marker"
 	  		});
 	  		var infowindow2 = new google.maps.InfoWindow({
-	      		content: "You are here (drag the marker if needed)"
+	      		content: "Search or drag green marker"
 	  		});
 	  		var windows = new Array(infowindow,infowindow2);
 
@@ -95,6 +103,7 @@
 
 		    	google.maps.event.addListener(m, 'dragend', function() {
 		    		getMe(this.getPosition(), this, windows[i], i);
+		    		calcRoute(marker,marker2);
 		  		});
 
 		  		google.maps.event.addListener(m, 'click', function() {
@@ -149,6 +158,25 @@
 			});
 
 	    }
+
+	    function calcRoute(m1, m2) {
+	    	
+	    	var travel_op=['DRIVING','BICYCLING','WALKING','TRANSIT'];
+
+  			var start = m1.getPosition();
+			var end = m2.getPosition();
+			var request = {
+			    origin:start,
+			    destination:end,
+			    travelMode: google.maps.TravelMode[travel_op[$('select').val()]]
+			};
+			directionsService.route(request, function(response, status) {
+			    if (status == google.maps.DirectionsStatus.OK) {
+			    	directionsDisplay.setDirections(response);
+			    }
+			});
+		}
+
 		
 		google.maps.event.addDomListener(window, 'load', getCoord);
 	    </script>
@@ -165,18 +193,20 @@
   						<div class="form-group">
 				    		<label class="text-info"> I'm leaving from: </label>
 				    		<input type="text" class="form-control" id="here" placeholder="Enter address or drag blue marker">
+				    		</input>
 				 		</div>
 				  		<div class="form-group">
 				    		<label class="text-info">Friend is leaving from: </label>
 				    		<input type="text" class="form-control" id="there" placeholder="Enter address or drag green marker">
+				    		</input>
 						</div>
 						<div class="form-group">
 							<label class="text-info">We're: </label>
 							<select class="form-control">
-								<option> Driving </option>
-								<option> Cycling </option>
-								<option> Walking </option>
-								<option> Using public transport </option>
+								<option value="0"> Driving </option>
+								<option value="1"> Cycling </option>
+								<option value="2"> Walking </option>
+								<option value="3"> Public transport and walking </option>
 							</select>
 						</div>
 						<div class="form-group">
@@ -206,8 +236,8 @@
 								</label>
 							</div>		
 						</div>
-						<input class="btn btn-default btn-primary pull-right" type="submit" value="Submit">
 					</form>
+					<button class="btn btn-default btn-primary pull-right" id="route"> Submit </button>
 	  			</div>
 				<div id="map-canvas" class="col-md-9"></div>
 			</div>
