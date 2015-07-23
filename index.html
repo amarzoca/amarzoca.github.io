@@ -47,6 +47,8 @@
 	  	}
 
 	    function initialize(here) {
+
+	    	var there = new google.maps.LatLng(here.lat()-0.001, here.lng()-0.004);
 	 
 	        var mapOptions = {
 	        	center: here,
@@ -59,36 +61,49 @@
 
 	        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-	        var options = {
-  				//types: ['address']
-			};
-	        autocomplete = new google.maps.places.Autocomplete(document.getElementById('here'), options);
-	        //places = new google.maps.places.PlacesService(map);
+
+	        autocomplete = new google.maps.places.Autocomplete(document.getElementById('here'));
+	        autocomplete2 = new google.maps.places.Autocomplete(document.getElementById('there'));
 
 
 	        var marker = new google.maps.Marker({
 	      		position: here,
 	      		draggable:true,
-	      		//icon:
+	      		icon:'./blue.png'
 
 	    	});
+	    	var marker2 = new google.maps.Marker({
+	      		position: there,
+	      		draggable:true,
+	      		icon:'./green.png'
+
+	    	});
+	    	var markers = new Array(marker,marker2);
 
 	    	var infowindow = new google.maps.InfoWindow({
 	      		content: "You are here (drag the marker if needed)"
 	  		});
-
-	    	marker.setMap(map)
-
-	    	getMe(here, marker, infowindow,0);
-
-	    	google.maps.event.addListener(marker, 'dragend', function() {
-	    		getMe(marker.getPosition(), marker, infowindow,0);
+	  		var infowindow2 = new google.maps.InfoWindow({
+	      		content: "You are here (drag the marker if needed)"
 	  		});
+	  		var windows = new Array(infowindow,infowindow2);
 
-	  		google.maps.event.addListener(marker, 'click', function() {
-  				infowindow.open(map,marker);
-  				map.panTo(marker.getPosition());
-  			});
+
+	  		markers.forEach(function(m,i) {
+	  			m.setMap(map);
+	  			getMe(m.getPosition(),m,windows[i],i);
+
+		    	google.maps.event.addListener(m, 'dragend', function() {
+		    		getMe(this.getPosition(), this, windows[i], i);
+		  		});
+
+		  		google.maps.event.addListener(m, 'click', function() {
+	  				windows[i].open(map,this);
+	  				map.panTo(this.getPosition());
+	  			});
+
+	  		});
+	  		map.panTo(here);
 
 	  		google.maps.event.addListener(autocomplete, 'place_changed', function () {
 	  			var res=autocomplete.getPlace();
@@ -96,12 +111,18 @@
             	map.panTo(marker.getPosition());
             	infowindow.setContent("<strong> You are here: </strong> <br>" + res.formatted_address);
         	});
+        	google.maps.event.addListener(autocomplete2, 'place_changed', function () {
+	  			var res=autocomplete2.getPlace();
+            	marker2.setPosition(res.geometry.location);
+            	map.panTo(marker2.getPosition());
+            	infowindow2.setContent("<strong> Friend is here: </strong> <br>" + res.formatted_address);
+        	});
 
 	    }
 
 	    function getMe(here, marker, infowindow, which) {
 
-	    	map.setCenter(here);
+	    	map.panTo(here);
 
 	    	geocoder.geocode({'location': here}, function(results, status) {
     			if (status == google.maps.GeocoderStatus.OK) {
@@ -110,6 +131,11 @@
         				if(which == 0) {
         					infowindow.setContent("<strong> You are here: </strong> <br>" + results[0].formatted_address);
         					$('#here').val(results[0].formatted_address);
+        				}
+
+        				if(which == 1) {
+        					infowindow.setContent("<strong> Friend is here: </strong> <br>" + results[0].formatted_address);
+        					$('#there').val(results[0].formatted_address);
         				}
         				infowindow.open(map, marker);
 
@@ -138,11 +164,11 @@
 	  				<form>
   						<div class="form-group">
 				    		<label class="text-info"> I'm leaving from: </label>
-				    		<input type="text" class="form-control" id="here" placeholder="Enter address or drag marker">
+				    		<input type="text" class="form-control" id="here" placeholder="Enter address or drag blue marker">
 				 		</div>
 				  		<div class="form-group">
 				    		<label class="text-info">Friend is leaving from: </label>
-				    		<input type="password" class="form-control" id="there" placeholder="soon">
+				    		<input type="text" class="form-control" id="there" placeholder="Enter address or drag green marker">
 						</div>
 						<div class="form-group">
 							<label class="text-info">We're: </label>
