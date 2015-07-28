@@ -53,7 +53,7 @@
 
 	    function initialize(here) {
 
-	    	var there = new google.maps.LatLng(here.lat()-0.002, here.lng()-0.005);
+	    	var there = new google.maps.LatLng(here.lat()-0.001, here.lng()-0.005);
 	 
 	        var mapOptions = {
 	        	center: here,
@@ -183,7 +183,7 @@
 			    	mid = new google.maps.Marker({
 	      				position: m,
 	      				draggable:false,
-	      				//icon:'./blue.png'
+	      				icon:'./grey.png'
 					});
 					mid.setMap(map);
 				
