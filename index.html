@@ -19,7 +19,7 @@
 	    <script type="text/javascript" src="./js/bootstrap.js"> </script>
 
 	    <script type="text/javascript"
-	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDfEGRgJCleog0v6QuMAAa6U-JMObrn68&region=RO&libraries=places">
+	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDfEGRgJCleog0v6QuMAAa6U-JMObrn68&region=RO&libraries=places,geometry">
 	    </script>
 
 	    <script type="text/javascript">
@@ -53,7 +53,7 @@
 
 	    function initialize(here) {
 
-	    	var there = new google.maps.LatLng(here.lat()-0.001, here.lng()-0.004);
+	    	var there = new google.maps.LatLng(here.lat()-0.002, here.lng()-0.005);
 	 
 	        var mapOptions = {
 	        	center: here,
@@ -138,12 +138,12 @@
      				if (results[0]) {
         
         				if(which == 0) {
-        					infowindow.setContent("<strong> You are here: </strong> <br>" + results[0].formatted_address);
+        					infowindow.setContent("<strong> You are here: </strong> <small class='pull-right'> (drag marker) </small> <br>" + results[0].formatted_address);
         					$('#here').val(results[0].formatted_address);
         				}
 
         				if(which == 1) {
-        					infowindow.setContent("<strong> Friend is here: </strong> <br>" + results[0].formatted_address);
+        					infowindow.setContent("<strong> Friend is here: </strong> <small class='pull-right'> (drag marker) </small><br>" + results[0].formatted_address);
         					$('#there').val(results[0].formatted_address);
         				}
         				infowindow.open(map, marker);
@@ -159,6 +159,7 @@
 
 	    }
 
+	    var mid;
 	    function calcRoute(m1, m2) {
 	    	
 	    	var travel_op=['DRIVING','BICYCLING','WALKING','TRANSIT'];
@@ -172,12 +173,62 @@
 			};
 			directionsService.route(request, function(response, status) {
 			    if (status == google.maps.DirectionsStatus.OK) {
+			    	var m = getMidPoint(response);
+
+			    	if(mid != null) {
+			    		mid.setMap(null);
+			    		mid=null;
+			    	}
+
+			    	mid = new google.maps.Marker({
+	      				position: m,
+	      				draggable:false,
+	      				//icon:'./blue.png'
+					});
+					mid.setMap(map);
+				
 			    	directionsDisplay.setDirections(response);
+			    	map.panTo(m);
+
 			    }
 			});
 		}
 
-		
+		function totalLength(r) {
+			var len=0;
+
+    		for (var i = 0; i < r.legs.length; i++) 
+       			len += r.legs[i].distance.value;
+
+       		return len;
+    	}
+
+    	google.maps.LatLng.prototype.dist = function (point) {
+    		return google.maps.geometry.spherical.computeDistanceBetween(this,point);
+    	}
+
+		function getMidPoint(e) {
+
+			var d = totalLength(e.routes[0]);
+			var route = e.routes[0].overview_path;
+
+			var half = d/2;
+			if (half==0) return route[0];
+
+			var t = 0, prev=0;
+			for(var i=0; i<route.length-1 && t<half; i++) {
+				prev = t;
+				t+=route[i].dist(route[i+1]);
+			}
+
+			if(t==half) return route[i];
+
+			var ratio = (half-prev)/(t-prev);
+			return google.maps.geometry.spherical.interpolate(route[i-1], route[i], ratio);
+		}
+
+					
+
 		google.maps.event.addDomListener(window, 'load', getCoord);
 	    </script>
 
@@ -206,7 +257,7 @@
 								<option value="0"> Driving </option>
 								<option value="1"> Cycling </option>
 								<option value="2"> Walking </option>
-								<option value="3"> Public transport and walking </option>
+								<option value="3"> Using public transport and walking </option>
 							</select>
 						</div>
 						<div class="form-group">
