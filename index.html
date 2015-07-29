@@ -19,7 +19,7 @@
 	    <script type="text/javascript" src="./js/bootstrap.js"> </script>
 
 	    <script type="text/javascript"
-	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDfEGRgJCleog0v6QuMAAa6U-JMObrn68&region=RO&libraries=places,geometry">
+	      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDDfEGRgJCleog0v6QuMAAa6U-JMObrn68&region=EU&libraries=places,geometry">
 	    </script>
 
 	    <script type="text/javascript">
@@ -29,8 +29,12 @@
 	    var autocomplete, places;
 
 	    var directionsService = new google.maps.DirectionsService();
-		var directionsDisplay = new google.maps.DirectionsRenderer({suppressMarkers: true});
+		var directionsDisplay = new google.maps.DirectionsRenderer({
+			suppressMarkers: true,
+			//preserveViewport: true
+		});
 
+		var markers, mid;
 		var resArray = new Array();
 
 
@@ -38,14 +42,19 @@
     		return google.maps.geometry.spherical.computeDistanceBetween(this,point);
     	}
 
-    	google.maps.LatLng.prototype.getMeHere = function (marker, infowindow, mes, which) {
-    		if (typeof marker.position == 'undefined') {
-    			marker.setMap(map);
-	    		marker.setPosition(this);
-		    	map.panTo(this);
-		    }
+    	google.maps.Marker.prototype.init = function () {
+    		this.setMap(map);
 
-	    	geocoder.geocode({'location': this}, function(results, status) {
+    		var m=this;
+    		google.maps.event.addListener(m, 'click', function() {
+	  			m.info.open(map, this);
+	  			map.panTo(this.getPosition());
+	  		});
+    	};
+
+    	google.maps.Marker.prototype.setMarker = function (mes, which) {
+    		var m=this;
+	    	geocoder.geocode({'location': this.getPosition()}, function(results, status) {
     			if (status == google.maps.GeocoderStatus.OK) {
      				if (results[0]) {
         
@@ -55,8 +64,8 @@
         				if(which == 1) 
         					$('#there').val(results[0].formatted_address);
 
-        				infowindow.setContent(mes + results[0].formatted_address);
-        				infowindow.open(map, marker);
+        				m.info.setContent(mes + results[0].formatted_address);
+        				m.info.open(map, m);
 
       				} else {
         				window.alert('No results found');
@@ -91,65 +100,51 @@
 	 
 	        var mapOptions = {
 	        	center: here,
-	        	streetViewControl: true,
-	        	zoomControlOptions: {
-	        		position: google.maps.ControlPosition.TOP_LEFT
-	    		},
-	          zoom: 16
+	          	zoom: 16
 	        };
 
 	        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 	        directionsDisplay.setMap(map);
 
-	        autocomplete = new google.maps.places.Autocomplete(document.getElementById('here'));
-	        autocomplete2 = new google.maps.places.Autocomplete(document.getElementById('there'));
-	        var forms = [autocomplete, autocomplete2];
-
-
 	        var marker = new google.maps.Marker({
 	      		position: here,
 	      		draggable:true,
-	      		icon:'./blue.png'
-
+	      		icon:'./blue.png',
+	      		form: new google.maps.places.Autocomplete(document.getElementById('here')),
+	      		info: new google.maps.InfoWindow()
 	    	});
+	  
 	    	var marker2 = new google.maps.Marker({
 	      		position: there,
 	      		draggable:true,
-	      		icon:'./green.png'
-
+	      		icon:'./green.png',
+	      		form: new google.maps.places.Autocomplete(document.getElementById('there')),
+	      		info: new google.maps.InfoWindow()
 	    	});
+
 	    	var markers = new Array(marker,marker2);
-
-	    	var infowindow = new google.maps.InfoWindow();
-	  		var infowindow2 = new google.maps.InfoWindow();
-	  		var windows = new Array(infowindow,infowindow2);
-
 
 	  		markers.forEach(function(m,i) {
 
-	  			m.setMap(map);
 	  			var mes = ( i==0 ? "You are here:" : "Friend is here:") ;
 	  			mes = "<strong>" + mes +  "</strong> <small class='pull-right'> (drag marker) </small> <br>";
 
-	  			windows[i].setContent("Search or drag marker");
-	  			m.getPosition().getMeHere(m, windows[i], mes, i);
+	  			m.info.setContent("Search or drag marker");
+	  			m.init();
+	  			m.setMarker(mes, i);
 
 		    	google.maps.event.addListener(m, 'dragend', function() {
-		    		this.getPosition().getMeHere(this, windows[i], mes, i);
+		    		this.setMarker(mes, i);
 		    		calcRoute(marker, marker2);
 		  		});
 
-		  		google.maps.event.addListener(m, 'click', function() {
-	  				windows[i].open(map, this);
-	  				map.panTo(this.getPosition());
-	  			});
-
-	  			google.maps.event.addListener(forms[i], 'place_changed', function () {
-		  			var res=forms[i].getPlace();
+	  			google.maps.event.addListener(m.form, 'place_changed', function () {
+		  			var res=m.form.getPlace();
 	            	m.setPosition(res.geometry.location);
 	            	map.panTo(m.getPosition());
+	            	calcRoute(marker, marker2);
 
-	            	windows[i].setContent(mes + res.formatted_address);
+	            	m.info.setContent(mes + res.formatted_address);
 	        	});
 
 	  		});
@@ -161,14 +156,17 @@
 	    	});
 	    }
 
-	    var mid, midInfo = new google.maps.InfoWindow();
-	    function calcRoute(m1, m2) {
-
+	    function clear() {
 	    	resArray.forEach(function (m) {
 	    		m.setMap(null);
 	    	});
-	    	resArray.length = 0;
-	    	
+	    	resArray = [];
+	    }
+
+	    function calcRoute(m1, m2) {
+
+	    	clear();
+	  
 	    	var travel_op=['DRIVING','BICYCLING','WALKING','TRANSIT'];
 
   			var start = m1.getPosition();
@@ -189,101 +187,20 @@
 
 			    	mid = new google.maps.Marker({
 	      				draggable:false,
-	      				icon:'./grey.png'
+	      				icon:'./grey.png',
+	      				position:m
 					});
 
+					mid.info = new google.maps.InfoWindow();
 			    	var mes = "<strong> Meet here </strong> <br>";
-			    	m.getMeHere(mid, midInfo, mes, -1);
+			    	mid.init(); mid.setMarker(mes, -1);
 
-			    	google.maps.event.addListener(map, 'center_changed', function() {
-	  					google.maps.event.trigger(midInfo, 'closeclick');
-	  	
-	  				});
-
-	  				google.maps.event.addListener(mid, 'click', function() {
-	  					midInfo.open(map, this);
-	  					map.panTo(m);
-	  				});
-				
 			    	directionsDisplay.setDirections(response);
+			    	startSearch(m, totalLength(response.routes[0]));
 
-
-			    	map.setCenter(m);
-			    	startSearch(m);
-
-			    	var bounds = new google.maps.LatLngBounds();
-					for(i = 0; i < resArray.length; i++) {
-						bounds.extend(resArray[i].getPosition());
-					}
-
-					map.panToBounds(bounds);
 				}
 			});
 		}
-
-		function getOptions()
-		{
-			var opt = [];
-
-			if($('#r').is(":checked"))
-				opt.push('restaurant', 'cafe');
-
-			if($('#h').is(":checked"))
-				opt.push('lodging');
-
-			if($('#n').is(":checked"))
-				opt.push('night_club','bar');
-
-			if($('#m').is(":checked"))
-				opt.push('museum','art_gallery');
-
-			if($('#m').is(":checked"))
-				opt.push('shopping_mall');
-
-			return opt;
-		}
-
-
-		function startSearch(x) {
-			
-			map.setCenter(x);
-
-			var request = {
-		    	location: x,
-		    	radius: 1000,
-		    	types: getOptions()
-		  	};
-		  	info = new google.maps.InfoWindow();
-		  	var service = new google.maps.places.PlacesService(map);
-		  	service.nearbySearch(request, function (results, status) {
-		  		if (status == google.maps.places.PlacesServiceStatus.OK) {
-			    	for (var i = 0; i < results.length; i++) {
-			      		createMarker(results[i]);
-			    	}
-			 	}
-		  	});
-		}
-
-	
-		function createMarker(place) {
-			var placeLoc = place.geometry.location;
-			var marker = new google.maps.Marker({
-		    	map: map,
-		    	position: place.geometry.location,
-		    	icon: './yellow.png'
-		  	});
-		  	marker.setMap(map);
-		  	marker.infowindow = new google.maps.InfoWindow();
-
-		  	google.maps.event.addListener(marker, 'click', function() {
-		    	marker.infowindow.setContent(place.name);
-		    	marker.infowindow.open(map, this);
-		  	});
-
-		  	resArray.push(marker);
-		}
-
-		
 
 		function totalLength(r) {
 			var len = 0;
@@ -291,6 +208,7 @@
     		for (var i = 0; i < r.legs.length; i++) 
        			len += r.legs[i].distance.value;
 
+       		console.log(len);
        		return len;
     	}
 
@@ -315,7 +233,77 @@
 			return google.maps.geometry.spherical.interpolate(route[i-1], route[i], ratio);
 		}
 
-					
+
+		function startSearch(x, len) {
+			
+			map.setCenter(x);
+
+			var request = {
+		    	location: x,
+		    	radius: len>8000? len/8 : 1000,
+		    	types: getOptions()
+		  	};
+		  	
+		  	var service = new google.maps.places.PlacesService(map);
+		  	service.nearbySearch(request, function (results, status) {
+		  		if (status == google.maps.places.PlacesServiceStatus.OK) {
+			    	for (var i = 0; i < results.length; i++) {
+			      		createMarker(results[i]);
+			    	}
+			 	}
+		  	});
+		}
+
+		function getOptions()
+		{
+			var opt = [];
+
+			if($('#r').is(":checked"))
+				opt.push('restaurant', 'cafe');
+
+			if($('#h').is(":checked"))
+				opt.push('lodging');
+
+			if($('#n').is(":checked"))
+				opt.push('night_club','bar');
+
+			if($('#m').is(":checked"))
+				opt.push('museum','art_gallery');
+
+			if($('#m').is(":checked"))
+				opt.push('shopping_mall');
+
+			return opt;
+		}
+
+		
+		var infoRes = new google.maps.InfoWindow();
+
+		function createMarker(place) {
+			var placeLoc = place.geometry.location;
+			var marker = new google.maps.Marker({
+		    	map: map,
+		    	position: place.geometry.location,
+		    	icon: './yellow.png'
+		  	});
+
+			var content = getContent(place);
+		  	google.maps.event.addListener(marker, 'click', function() {
+		    	infoRes.setContent(content);
+		    	infoRes.open(map, this);
+		  	});
+
+		  	resArray.push(marker);
+		}
+
+		function getContent(e) {
+
+			var cont = "";
+			cont += "<strong> " + e.name + "</strong> <br>";
+			cont += e.vicinity;
+
+			return cont;
+		}					
 
 		google.maps.event.addDomListener(window, 'load', getCoord);
 	    </script>
