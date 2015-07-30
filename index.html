@@ -36,6 +36,7 @@
 
 		var markers, mid;
 		var resArray = new Array();
+		var submit = false;
 
 
 		google.maps.LatLng.prototype.dist = function (point) {
@@ -135,14 +136,14 @@
 
 		    	google.maps.event.addListener(m, 'dragend', function() {
 		    		this.setMarker(mes, i);
-		    		calcRoute(marker, marker2);
+		    		if(submit) calcRoute(marker, marker2);
 		  		});
 
 	  			google.maps.event.addListener(m.form, 'place_changed', function () {
 		  			var res=m.form.getPlace();
 	            	m.setPosition(res.geometry.location);
 	            	map.panTo(m.getPosition());
-	            	calcRoute(marker, marker2);
+	            	if(submit) calcRoute(marker, marker2);
 
 	            	m.info.setContent(mes + res.formatted_address);
 	        	});
@@ -153,10 +154,11 @@
 
         	$('#route').click(function () { 
 	    		calcRoute(marker,marker2);
+	    		submit=true;
 	    	});
 
 	    	$('select, input[type="checkbox"]').change(function() {
-	    		calcRoute(marker,marker2);
+	    		if(submit) calcRoute(marker,marker2);
 	    	});
 	    }
 
