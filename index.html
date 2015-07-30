@@ -154,6 +154,10 @@
         	$('#route').click(function () { 
 	    		calcRoute(marker,marker2);
 	    	});
+
+	    	$('select, input[type="checkbox"]').change(function() {
+	    		calcRoute(marker,marker2);
+	    	});
 	    }
 
 	    function clear() {
@@ -271,13 +275,15 @@
 				opt.push('museum','art_gallery');
 
 			if($('#m').is(":checked"))
-				opt.push('shopping_mall');
+				opt.push('shopping_mall', 'clothing_store');
 
 			return opt;
 		}
 
 		
-		var infoRes = new google.maps.InfoWindow();
+		var infoRes = new google.maps.InfoWindow({
+			zIndex: 10
+		});
 
 		function createMarker(place) {
 			var placeLoc = place.geometry.location;
@@ -287,20 +293,34 @@
 		    	icon: './yellow.png'
 		  	});
 
-			var content = getContent(place);
-		  	google.maps.event.addListener(marker, 'click', function() {
-		    	infoRes.setContent(content);
-		    	infoRes.open(map, this);
-		  	});
+		  	var request = {
+  				placeId: place.place_id
+			}
 
-		  	resArray.push(marker);
+			service = new google.maps.places.PlacesService(map);
+			service.getDetails(request, function (res, status) {
+				if (status == google.maps.places.PlacesServiceStatus.OK) {
+
+    				var content = getContent(res);
+		  			google.maps.event.addListener(marker, 'click', function() {
+		    			infoRes.setContent(content);
+		    			infoRes.open(map, this);
+		  			});
+
+		  			resArray.push(marker);
+  				}
+  				else marker.setMap(null);
+			});		
+			
 		}
 
 		function getContent(e) {
 
 			var cont = "";
 			cont += "<strong> " + e.name + "</strong> <br>";
-			cont += e.vicinity;
+			if(typeof e.vicinity != "undefined") cont += e.vicinity + "<br>";
+			if(typeof e.website != "undefined") cont += "<a href='"+e.website+ "'>" + e.website + "</a> <br>";
+			if(typeof e.url != "undefined") cont +=  "<a href='"+e.url+ "'> see more </a> <br>";
 
 			return cont;
 		}					
@@ -365,7 +385,7 @@
 							<div class="checkbox">
 								<label>
 								    <input type="checkbox" id="s">
-								    Shopping mall
+								    Shopping center
 								</label>
 							</div>		
 						</div>
