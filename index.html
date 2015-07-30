@@ -34,7 +34,7 @@
 			//preserveViewport: true
 		});
 
-		var markers, mid;
+		var markers, mid = new google.maps.InfoWindow();
 		var resArray = new Array();
 		var submit = false;
 
@@ -111,6 +111,7 @@
 	      		position: here,
 	      		draggable:true,
 	      		icon:'./blue.png',
+	      		zIndex:1,
 	      		form: new google.maps.places.Autocomplete(document.getElementById('here')),
 	      		info: new google.maps.InfoWindow()
 	    	});
@@ -119,6 +120,7 @@
 	      		position: there,
 	      		draggable:true,
 	      		icon:'./green.png',
+	      		zIndex:1,
 	      		form: new google.maps.places.Autocomplete(document.getElementById('there')),
 	      		info: new google.maps.InfoWindow()
 	    	});
@@ -194,7 +196,8 @@
 			    	mid = new google.maps.Marker({
 	      				draggable:false,
 	      				icon:'./grey.png',
-	      				position:m
+	      				position:m,
+	      				zIndex:5
 					});
 
 					mid.info = new google.maps.InfoWindow();
@@ -305,6 +308,7 @@
 
     				var content = getContent(res);
 		  			google.maps.event.addListener(marker, 'click', function() {
+		  				mid.info.close();
 		    			infoRes.setContent(content);
 		    			infoRes.open(map, this);
 		  			});
@@ -362,7 +366,7 @@
 							<label class="text-info">We're looking for a: </label>
 							<div class="checkbox">
 								<label>
-								    <input type="checkbox" id="r">
+								    <input type="checkbox" id="r" checked>
 								    Restaurant or cafe
 								</label>
 							</div>
