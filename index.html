@@ -263,9 +263,10 @@
 		  	});
 		}
 
+		var opt;
 		function getOptions()
 		{
-			var opt = [];
+			opt = [];
 
 			if($('#r').is(":checked"))
 				opt.push('restaurant', 'cafe');
@@ -279,7 +280,7 @@
 			if($('#m').is(":checked"))
 				opt.push('museum','art_gallery');
 
-			if($('#m').is(":checked"))
+			if($('#s').is(":checked"))
 				opt.push('shopping_mall', 'clothing_store');
 
 			return opt;
