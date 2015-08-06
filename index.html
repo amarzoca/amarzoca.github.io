@@ -4,12 +4,25 @@
 
 	  	<link rel="stylesheet" href="./css/bootstrap.css" /> 
 	    <style type="text/css">
-	      html, body, .row, .container-fluid { height: 100%; width:100%; margin: 0; padding: 0;}
-	      .row>div {height:100%;}
-	      #map-canvas { padding: 0;}
-	      .checkbox {margin-left:8px; margin-bottom:3px;}
-	      .checkbox:first-of-type {margin-top:-5px;}
-
+	    	html, body, .row, .container-fluid { 
+		      	height: 100%; 
+		      	width:100%; 
+		      	margin: 0; 
+		      	padding: 0;
+	    	}
+	    	.row > div {
+	      		height:100%;
+	      	}
+	      	#map-canvas {
+	       		padding: 0;
+	   		}
+	      	.checkbox {
+	      		margin-left:8px; 
+	      		margin-bottom:3px;
+	      	}
+	     	.checkbox:first-of-type {
+	     		margin-top:-5px;
+	     	}
 	      
 	    </style>
 
@@ -249,9 +262,13 @@
 
 			var request = {
 		    	location: x,
-		    	radius: len>8000? len/8 : 500,
 		    	types: getOptions()
 		  	};
+
+		  	if(len < 10000)
+		  		request.rankBy = google.maps.places.RankBy.DISTANCE;
+		  	else 
+		  		request.radius = len/10;
 		  	
 		  	var service = new google.maps.places.PlacesService(map);
 		  	service.nearbySearch(request, function (results, status) {
@@ -327,7 +344,7 @@
 			cont += "<strong> " + e.name + "</strong> <br>";
 			if(typeof e.vicinity != "undefined") cont += e.vicinity + "<br>";
 			if(typeof e.website != "undefined") cont += "<a href='"+e.website+ "'>" + e.website + "</a> <br>";
-			if(typeof e.url != "undefined") cont +=  "<a href='"+e.url+ "'> more info </a> <br>";
+			if(typeof e.url != "undefined") cont +=  "<a href='"+e.url+ "' target='_blank'> more info </a> <br>";
 
 			return cont;
 		}					
