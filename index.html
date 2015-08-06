@@ -251,8 +251,13 @@
 
 			if(t == halfDist) return route[i];
 
-			var ratio = (halfDist - prev)/(t - prev);
-			return google.maps.geometry.spherical.interpolate(route[i-1], route[i], ratio);
+			/* if($('select').val() == "3") {
+				return route[i-1];
+			}
+			else { */
+				var ratio = (halfDist - prev)/(t - prev);
+				return google.maps.geometry.spherical.interpolate(route[i-1], route[i], ratio);
+			//}
 		}
 
 
@@ -386,9 +391,9 @@
 							<label class="text-info">We're: </label>
 							<select class="form-control">
 								<option value="0"> Driving </option>
-								<option value="1"> Cycling </option>
 								<option value="2"> Walking </option>
 								<option value="3"> Using public transport and walking </option>
+								<option value="1"> Cycling (not available in all regions) </option>
 							</select>
 						</div>
 						<div class="form-group">
