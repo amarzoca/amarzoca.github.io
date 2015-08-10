@@ -3,6 +3,9 @@
   	<head>
 
 	  	<link rel="stylesheet" href="./css/bootstrap.css" /> 
+
+	  	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 	    <style type="text/css">
 	    	html, body, .row, .container-fluid { 
 		      	height: 100%; 
@@ -47,7 +50,7 @@
 		});
 
 		var mid=null;
-		var resArray = new Array();
+		var markers, resArray = new Array();
 		var submit = false;
 
 
@@ -65,9 +68,14 @@
 	  		});
     	};
 
-    	google.maps.Marker.prototype.setMarker = function (which) {
-    		var m=this;
-	    	geocoder.geocode({'location': this.getPosition()}, function(results, status) {
+    	google.maps.Marker.prototype.setMarker = function (loc, which) {
+
+    		if(this.getPosition() != loc) {
+    			this.setPosition(loc);
+    		}
+
+			var m=this;
+	    	geocoder.geocode({'location': loc}, function(results, status) {
     			if (status == google.maps.GeocoderStatus.OK) {
      				if (results[0]) {
         
@@ -90,30 +98,34 @@
 	    }
 
 	    function getCoord() {
-	      	var lat = 45.7597, lng = 21.2300;
+	      	var lat = 51.5120, lng = -0.1250;
 	      	var here = new google.maps.LatLng(lat, lng);
 
+	      	initialize(here);
 	      	if (navigator.geolocation) {
 	        	navigator.geolocation.getCurrentPosition(function (res) {
 	        		lat = res.coords.latitude;
 	        		lng = res.coords.longitude;
 	        		here = new google.maps.LatLng(lat, lng);
 
-	        		initialize(here);
+	        		markers[0].setMarker(here, 0);
+	        		markers[1].setMarker(initFriend(here), 1);
+	        		map.setCenter(here);
 	        	});
 	    	} 
-	    	else { 
-	    		initialize(here);
-	    	}
+	  	}
+
+	  	function initFriend(here) {
+	  		return new google.maps.LatLng(here.lat()-0.01, here.lng()-0.03);
 	  	}
 
 	    function initialize(here) {
 
-	    	var there = new google.maps.LatLng(here.lat()-0.001, here.lng()-0.004);
+	    	var there = initFriend(here);
 	 
 	        var mapOptions = {
 	        	center: here,
-	          	zoom: 16
+	          	zoom: 13
 	        };
 
 	        map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
@@ -137,7 +149,7 @@
 	      		info: new google.maps.InfoWindow()
 	    	});
 
-	    	var markers = new Array(marker,marker2);
+	    	markers = new Array(marker,marker2);
 
 	  		markers.forEach(function(m,i) {
 
@@ -146,10 +158,10 @@
 
 	  			m.info.setContent("Search or drag marker");
 	  			m.init();
-	  			m.setMarker(i);
+	  			m.setMarker(m.getPosition(), i);
 
 		    	google.maps.event.addListener(m, 'dragend', function() {
-		    		this.setMarker(i);
+		    		this.setMarker(this.getPosition(), i);
 		    		if(submit) calcRoute(marker, marker2);
 		  		});
 
@@ -207,19 +219,19 @@
 			    	}
 
 			    	mid = new google.maps.Marker({
-	      				draggable:false,
-	      				icon:'./grey.png',
-	      				position:m,
-	      				zIndex:5
+	      				draggable: false,
+	      				icon: './grey.png',
+	      				position: m,
+	      				zIndex: 5
 					});
 
 					mid.info = new google.maps.InfoWindow();
-			    	mid.message = "<strong> Meet here </strong> <br>";
+			    	mid.message = "<strong> Meet around here </strong> <br>";
 			    	mid.init(); 
 
 			    	var len = totalLength(response.routes[0]);
 
-			    	mid.setMarker(-1);
+			    	mid.setMarker(m, -1);
 			    	directionsDisplay.setDirections(response);
 			    	startSearch(m, len);	    		
 			    	
@@ -320,6 +332,7 @@
 			    	}
 			 	}
 		  	});
+
 		}
 
 		function getOptions()
