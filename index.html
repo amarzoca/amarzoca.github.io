@@ -259,8 +259,13 @@
 			    	mid.init(); 
 
 			    	var len = totalLength(response.routes[0]);
+			    	if(small) {
+			  				markers.forEach(function(m) {
+			  					m.info.close();
+			  				});
+			  			}
 
-			    	mid.setMarker(m, -1);
+			  		mid.setMarker(m, -1);
 			    	directionsDisplay.setDirections(response);
 			    	startSearch(m, len);	    		
 			    	
