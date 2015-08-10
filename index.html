@@ -10,21 +10,41 @@
 	    	html, body, .row, .container-fluid { 
 		      	height: 100%; 
 		      	width:100%; 
-		      	margin: 0; 
-		      	padding: 0;
-	    	}
-	    	.row > div {
-	      		height:100%;
-	      	}
-	      	#map-canvas {
-	       		padding: 0;
-	   		}
+	    	}      	
 	      	.checkbox {
 	      		margin-left:8px; 
 	      		margin-bottom:3px;
 	      	}
 	     	.checkbox:first-of-type {
 	     		margin-top:-5px;
+	     	}
+
+	     	@media (max-width: 991px) {
+	     		#map-canvas {
+	     			height:80%;
+	     			margin-left:10px;
+	     			margin-right:10px;
+	     		}
+	     		#form {
+	     			margin-bottom:5px;
+	     		}
+	     		.row {
+	     			margin: 0;
+	     		}
+	     		.route {
+	     			width:60%;
+	     		}
+	     	}
+
+	     	@media (min-width: 992px) {
+	     		html, body, .row, .container-fluid {
+	     			margin: 0;
+	     			padding: 0;
+	     		}
+	     		#map-canvas {
+	     			padding: 0;
+	     			height:100%;
+	     		}
 	     	}
 	      
 	    </style>
@@ -179,7 +199,7 @@
 	  		map.setCenter(here);
 
 
-        	$('#route').click(function () { 
+        	$('.route').click(function () { 
 	    		calcRoute(marker,marker2);
 	    		submit=true;
 	    	});
@@ -479,8 +499,10 @@
 								</label>
 							</div>		
 						</div>
+						<input type="button" class="route btn btn-primary pull-right hidden-xs hidden-sm" value="Submit"/>
+						<input type="button" class="route btn btn-primary center-block visible-xs visible-sm" value="Submit"/>
 					</form>
-					<button class="btn btn-default btn-primary pull-right" id="route"> Submit </button>
+
 	  			</div>
 				<div id="map-canvas" class="col-md-9"></div>
 			</div>
