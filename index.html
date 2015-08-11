@@ -34,6 +34,10 @@
 	     		.route {
 	     			width:60%;
 	     		}
+	     		#hidden_column {
+	     			text-align: center;
+	     		}
+	     
 	     	}
 
 	     	@media (min-width: 992px) {
@@ -50,13 +54,16 @@
 	     		#contact {
 		     		position: absolute;
 		     		bottom: 0;
-		     		margin-left: 35%;
 		     		height: 25px;
 	     		}
 		     	#form {
 		     		height: auto;
 		     		min-height: 100%;
 		     		padding-bottom: 25px;
+		     	}
+		     	#contact_wrap
+		     	{
+		     		text-align:center;
 		     	}
 
 	     	}
@@ -534,14 +541,16 @@
 							</div>		
 						</div>
 						<input type="button" class="route btn btn-primary pull-right hidden-xs hidden-sm" value="Submit"/>
-						<input type="button" class="route btn btn-primary center-block visible-xs visible-sm" value="Submit"/>
+						<input type="button" class="route btn btn-primary center-block hidden-lg hidden-md" value="Submit"/>
 					</form>
-					<a id="contact" class="hidden-xs hidden-sm" href="./contact.html"> Contact us </a>
+					<div id="contact_wrap"> <a id="contact" class="hidden-xs hidden-sm" href="./contact.html"> Contact us </a> </div>
 	  			</div>
 				<div id="map-canvas" class="col-md-9"></div>
+				<div id="hidden_column" class="col-md-1 hidden-md hidden-lg">
+					<a href="./contact.html"> Contact us </a>
+				</div>
 			</div>
 		</div> 
-		<!--<div id="map-canvas" ></div> -->
 
 	</body>
 </html>
