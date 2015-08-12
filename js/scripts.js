@@ -7,9 +7,9 @@ var directionsDisplay = new google.maps.DirectionsRenderer({
 	suppressMarkers: true
 });
 
-var mid=null;
+var mid = null;
 var markers, resArray = new Array();
-var submit = false, small = false;
+var submit = false, done = true, small = false;
 
 $(document).ready(function () {
 	if($(window).width() < 992) {
@@ -146,12 +146,12 @@ function initialize(here) {
 
 
 	$('.route').click(function () { 
-		calcRoute(marker,marker2);
+		if(done) calcRoute(marker,marker2);
 		submit=true;
 	});
 
 	$('select, input[type="checkbox"]').change(function() {
-		if(submit) calcRoute(marker,marker2);
+		if(submit && done) calcRoute(marker,marker2);
 	});
 }
 
@@ -283,7 +283,7 @@ function getMidPoint(e) {
 
 
 function startSearch(x, len) {
-	
+
 	map.setCenter(x);
 
 	var request = {
@@ -295,11 +295,11 @@ function startSearch(x, len) {
   		request.rankBy = google.maps.places.RankBy.DISTANCE;
   	else 
   		request.radius = len/10;
-  	
+
   	var service = new google.maps.places.PlacesService(map);
   	service.nearbySearch(request, function (results, status) {
   		if (status == google.maps.places.PlacesServiceStatus.OK) {
-	    	for (var i = 0; i < results.length; i++) {
+	    	for (var i = 0; i < results.length && i < 15; i++) {
 	      		createMarker(results[i]);
 	    	}
 	 	}
@@ -335,38 +335,46 @@ var infoRes = new google.maps.InfoWindow({
 });
 
 function createMarker(place) {
-	var placeLoc = place.geometry.location;
+
 	var marker = new google.maps.Marker({
     	map: map,
     	position: place.geometry.location,
-    	icon: './yellow.png'
+    	icon: './yellow.png',
+    	placeRes: place
   	});
 
-  	var request = {
-			placeId: place.place_id
-	}
+	google.maps.event.addListener(marker, 'click', function() {
+  		mid.info.close();
+
+  		if(small) {
+	  		markers.forEach(function(m) {
+	  			m.info.close();
+	  		});
+	  	}
+
+		getDetails(this);
+  	});
+
+	resArray.push(marker);
+  	marker.setMap(map);
+}
+
+function getDetails(marker) {
+	var request = {
+			placeId: marker.placeRes.place_id
+	};
+
+	var content = "";
 
 	var service = new google.maps.places.PlacesService(map);
 	service.getDetails(request, function (res, status) {
-		if (status == google.maps.places.PlacesServiceStatus.OK) {
+		if (status == google.maps.places.PlacesServiceStatus.OK) 
+			content = getContent(res);		
+		else 
+			content = marker.placeRes.name;	
 
-			var content = getContent(res);
-  			google.maps.event.addListener(marker, 'click', function() {
-  				mid.info.close();
-
-  				if(small) {
-	  				markers.forEach(function(m) {
-	  					m.info.close();
-	  				});
-	  			}
-
-    			infoRes.setContent(content);
-    			infoRes.open(map, this);
-  			});
-
-  			resArray.push(marker);
-			}
-			else marker.setMap(null);
+		infoRes.setContent(content);
+   		infoRes.open(map, marker);
 	});		
 	
 }
