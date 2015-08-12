@@ -331,7 +331,7 @@ function getOptions()
 
 
 var infoRes = new google.maps.InfoWindow({
-	zIndex: 10
+	zIndex: 5
 });
 
 function createMarker(place) {
