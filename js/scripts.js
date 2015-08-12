@@ -324,7 +324,7 @@ function getOptions()
 		opt.push('museum','art_gallery');
 
 	if($('#s').is(":checked"))
-		opt.push('shopping_mall', 'clothing_store');
+		opt.push('shopping_mall');
 
 	return opt;
 }
