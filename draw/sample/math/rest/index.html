@@ -74,7 +74,7 @@
                                 }
                             }
 							
-							$.get({url: "http://api.wolframalpha.com/v2/query?input=pi&appid=43X24E-W8HQVAAH54",
+							$.ajax({url: "http://api.wolframalpha.com/v2/query?input=pi&appid=43X24E-W8HQVAAH54",
 								dataType: "jsonp",
 								success: function(res){
 									console.log(res);
