@@ -3,6 +3,18 @@
 <head>
     <meta charset="utf-8" />
     <title>Math - REST sample</title>
+	<style>
+		body {
+			width:100%;
+			}
+		canvas {
+			position:relative;
+			margin-left:auto;
+			margin-right:auto;
+			
+		}
+		
+	</style>
 </head>
 
 <body>
@@ -11,11 +23,12 @@
     <button id="undo">Undo</button>
     <button id="redo">Redo</button>
     <br />
-    <canvas id="canvas" width="400" height="300" style="background-color: lightyellow; border: 1px solid darkgoldenrod;"></canvas>
+    <canvas id="canvas" width="400" height="300" style="border: 1px solid darkgoldenrod;"></canvas>
     <br />
     <pre id="result"></pre>
 </body>
 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"> </script>
 <script type="text/javascript" src="../../lib/core-min.js"></script>
 <script type="text/javascript" src="../../lib/x64-core-min.js"></script>
 <script type="text/javascript" src="../../lib/sha512-min.js"></script>
@@ -60,6 +73,10 @@
                                     result.innerHTML = results[i].getValue();
                                 }
                             }
+							
+							$.ajax({url: "http://api.wolframalpha.com/v2/query?input=pi&appid=43X24E-W8HQVAAH54", success: function(res){
+								result.html(res);
+							}});
                         }
                 );
             }
