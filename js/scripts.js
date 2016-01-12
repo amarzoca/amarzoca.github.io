@@ -231,7 +231,7 @@ function solveLargeRoutes(req, len) {
 		location: mid.getPosition(),
 		types: ['city_hall', 'post_office', 'police'],
 		rankBy: google.maps.places.RankBy.PROMINENCE, 
-		radius: len/10
+		radius: len/5
 	};
 
 	var service = new google.maps.places.PlacesService(map);
