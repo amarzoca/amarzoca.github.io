@@ -204,11 +204,11 @@ function calcRoute(m1, m2) {
 	  			}
 
 	  		console.log(len)	
-	    	if(len < 100 || !solveLargeRoutes(request, len)) {
+	    	//if(len < 100 || !solveLargeRoutes(request, len)) {
 		  		mid.setMarker(m, -1);
 		    	directionsDisplay.setDirections(response);
 		    	startSearch(m, len);
-		    }
+		    //}
 		}
 	});
 }
@@ -223,7 +223,7 @@ function totalLength(r) {
 		console.log(len);
 		return len;
 }
-
+/*
 function solveLargeRoutes(req, len) {
 	var request = {
 		location: mid.getPosition(),
@@ -260,7 +260,7 @@ function solveLargeRoutes(req, len) {
 				return false;
 			}
 		});
-}
+}*/
 
 function getMidPoint(e) {
 
