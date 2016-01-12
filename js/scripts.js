@@ -42,21 +42,21 @@ google.maps.Marker.prototype.setMarker = function (loc, which) {
 		if (status == google.maps.GeocoderStatus.OK) {
 				if (results[0]) {
 
-				if(which == 0) 
-					$('#here').val(results[0].formatted_address);
-		
-				if(which == 1) 
-					$('#there').val(results[0].formatted_address);
+					if(which == 0) 
+						$('#here').val(results[0].formatted_address);
+			
+					if(which == 1) 
+						$('#there').val(results[0].formatted_address);
 
-				if(small)
-					m.info.setContent(m.message);
-				else
-					m.info.setContent(m.message + results[0].formatted_address);
+					if(small)
+						m.info.setContent(m.message);
+					else
+						m.info.setContent(m.message + results[0].formatted_address);
 
-				m.info.open(map, m);
+					m.info.open(map, m);
 
-				} else {
-				window.alert('No results found');
+					} else {
+					window.alert('No results found');
 				}
 	    } else {
 	      window.alert('Could not pinpoint location');
@@ -203,14 +203,12 @@ function calcRoute(m1, m2) {
 	  				});
 	  			}
 
-	  		mid.setMarker(m, -1);
-	    	directionsDisplay.setDirections(response);
-	    
-	    	console.log(len)	
-	    	if(len > 100) 
-	    		if(!solveLargeRoutes(request, len))
-	    			startSearch(m, len);   		
-	    	
+	  		console.log(len)	
+	    	if(len < 100 || !solveLargeRoutes(request, len)) {
+		  		mid.setMarker(m, -1);
+		    	directionsDisplay.setDirections(response);
+		    	startSearch(m, len);
+		    }
 		}
 	});
 }
@@ -246,11 +244,11 @@ function solveLargeRoutes(req, len) {
 				directionsService.route(req, function(response, status) {
 		    		if (status == google.maps.DirectionsStatus.OK) {
 		    			mid.setPosition(res[0].geometry.location);
-		    			mid.info.setContent(mid.message + res[0].name);
+		    			mid.info.setContent(mid.message + res[0].formatted_address);
 		    			mid.info.open(map, mid);
 
 		    			directionsDisplay.setDirections(response);
-		    			startSearch(mid.getPosition(), len);
+		    			startSearch(mid.getPosition(), len/5);
 		    			return true;
 		    		}
 		    		else return false;
