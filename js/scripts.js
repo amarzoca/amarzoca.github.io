@@ -205,8 +205,11 @@ function calcRoute(m1, m2) {
 
 	  		mid.setMarker(m, -1);
 	    	directionsDisplay.setDirections(response);
-	    	//startSearch(m, len);	
-	    	if(len > 100) solveLargeRoutes(request);    		
+	    
+	    	console.log(len)	
+	    	if(len > 100) 
+	    		if(!solveLargeRoutes(request, len))
+	    			startSearch(m, len);   		
 	    	
 		}
 	});
@@ -223,11 +226,12 @@ function totalLength(r) {
 		return len;
 }
 
-function solveLargeRoutes(req) {
+function solveLargeRoutes(req, len) {
 	var request = {
 		location: mid.getPosition(),
 		types: ['city_hall', 'post_office', 'police'],
-		rankBy: google.maps.places.RankBy.DISTANCE
+		rankBy: google.maps.places.RankBy.PROMINENCE, 
+		radius: len/10
 	};
 
 	var service = new google.maps.places.PlacesService(map);
@@ -246,7 +250,7 @@ function solveLargeRoutes(req) {
 		    			mid.info.open(map, mid);
 
 		    			directionsDisplay.setDirections(response);
-		    			startSearch(mid.getPosition(), 50000);
+		    			startSearch(mid.getPosition(), len);
 		    			return true;
 		    		}
 		    		else return false;
@@ -254,7 +258,7 @@ function solveLargeRoutes(req) {
 		}
 			else 
 			{
-				alert(status);
+				console.log(status);
 				return false;
 			}
 		});
